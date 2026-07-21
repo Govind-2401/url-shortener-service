@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.govind.urlshortener.dto.UrlAnalyticsDto;
+import java.time.LocalDateTime;
 
 import java.net.URI;
 
@@ -53,5 +55,32 @@ public class UrlMappingController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(mapping.getOriginalUrl()))
                 .build();
+    }
+
+    @GetMapping("/api/analytics/{shortCode}")
+    public ResponseEntity<UrlAnalyticsDto> getAnalytics(
+            @PathVariable String shortCode,
+            HttpServletRequest httpServletRequest) {
+
+        UrlMapping mapping = urlMappingService.getAnalyticsByShortCode(shortCode);
+
+        String domainUrl = httpServletRequest.getRequestURL().toString()
+                .replace(httpServletRequest.getRequestURI(), "");
+        String fullShortUrl = domainUrl + "/" + mapping.getShortCode();
+
+        boolean isExpired = mapping.getExpiryDate() != null &&
+                mapping.getExpiryDate().isBefore(LocalDateTime.now());
+
+        UrlAnalyticsDto analytics = UrlAnalyticsDto.builder()
+                .shortCode(mapping.getShortCode())
+                .originalUrl(mapping.getOriginalUrl())
+                .shortUrl(fullShortUrl)
+                .clickCount(mapping.getClickCount())
+                .createdAt(mapping.getCreatedAt())
+                .expiryDate(mapping.getExpiryDate())
+                .isExpired(isExpired)
+                .build();
+
+        return ResponseEntity.ok(analytics);
     }
 }

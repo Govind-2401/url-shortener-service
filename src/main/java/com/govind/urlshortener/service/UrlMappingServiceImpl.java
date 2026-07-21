@@ -48,4 +48,11 @@ public class UrlMappingServiceImpl implements UrlMappingService {
         mapping.setClickCount(mapping.getClickCount() + 1);
         return repository.save(mapping);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UrlMapping getAnalyticsByShortCode(String shortCode) {
+        return repository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException("Short URL not found for code: " + shortCode));
+    }
 }

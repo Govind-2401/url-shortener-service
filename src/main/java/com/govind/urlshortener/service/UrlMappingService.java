@@ -7,4 +7,6 @@ public interface UrlMappingService {
     UrlMapping createShortUrl(String originalUrl);
 
     UrlMapping getByShortCode(String shortCode);
+
+    UrlMapping getAnalyticsByShortCode(String shortCode);
 }
