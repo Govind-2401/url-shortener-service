@@ -1,6 +1,7 @@
 package com.govind.urlshortener.service;
 
 import com.govind.urlshortener.entity.UrlMapping;
+import com.govind.urlshortener.exception.UrlNotFoundException;
 import com.govind.urlshortener.repository.UrlMappingRepository;
 import com.govind.urlshortener.util.Base62Encoder;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class UrlMappingServiceImpl implements UrlMappingService {
                     // Step 1: Save without shortCode
                     UrlMapping url = UrlMapping.builder()
                             .originalUrl(originalUrl)
+                            .clickCount(0L) // Initializing clickCount explicitly
                             .build();
 
                     UrlMapping saved = repository.save(url);
@@ -31,13 +33,19 @@ public class UrlMappingServiceImpl implements UrlMappingService {
                     String shortCode = Base62Encoder.encode(saved.getId());
                     saved.setShortCode(shortCode);
 
+                    // Step 3: Save again with updated shortCode
                     return repository.save(saved);
                 });
     }
 
     @Override
+    @Transactional
     public UrlMapping getByShortCode(String shortCode) {
-        return repository.findByShortCode(shortCode)
-                .orElseThrow(() -> new RuntimeException("Short URL not found"));
+        UrlMapping mapping = repository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException("Short URL not found for code: " + shortCode));
+
+        // Increment click count on every access/redirect
+        mapping.setClickCount(mapping.getClickCount() + 1);
+        return repository.save(mapping);
     }
 }
