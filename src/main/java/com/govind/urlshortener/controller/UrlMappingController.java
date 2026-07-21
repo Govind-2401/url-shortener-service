@@ -28,7 +28,7 @@ public class UrlMappingController {
             @Valid @RequestBody ShortenRequestDto request,
             HttpServletRequest httpServletRequest) {
 
-        UrlMapping mapping = urlMappingService.createShortUrl(request.getOriginalUrl());
+        UrlMapping mapping = urlMappingService.createShortUrl(request.getOriginalUrl(), request.getDaysToExpire());
 
         // Base URL dynamic extract karne ke liye (e.g., http://localhost:8080/)
         String domainUrl = httpServletRequest.getRequestURL().toString()

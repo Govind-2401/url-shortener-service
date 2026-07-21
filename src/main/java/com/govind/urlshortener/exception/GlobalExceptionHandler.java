@@ -27,4 +27,11 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
+
+    @ExceptionHandler(UrlExpiredException.class)
+    public ResponseEntity<Map<String, String>> handleUrlExpired(UrlExpiredException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.GONE).body(response); // HTTP 410 Gone
+    }
 }
