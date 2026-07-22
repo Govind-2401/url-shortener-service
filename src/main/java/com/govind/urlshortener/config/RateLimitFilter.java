@@ -19,20 +19,26 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private final RateLimiterService rateLimiterService;
 
+    // Filter Bypass for Swagger UI and Static Docs
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.equals("/swagger-ui.html");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Client IP address extract karein
         String clientIp = request.getRemoteAddr();
         Bucket bucket = rateLimiterService.resolveBucket(clientIp);
 
-        // Try to consume 1 token from the bucket
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
-            // Limit exceed -> Return 429 Too Many Requests
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Too many requests. Limit is 10 requests per minute.\"}");
