@@ -8,7 +8,7 @@ import com.govind.urlshortener.util.Base62Encoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.cache.annotation.Cacheable;
 import java.time.LocalDateTime;
 
 @Service
@@ -50,6 +50,7 @@ public class UrlMappingServiceImpl implements UrlMappingService {
 
     @Override
     @Transactional
+    @Cacheable(value = "urls", key = "#shortCode")
     public UrlMapping getByShortCode(String shortCode) {
         UrlMapping mapping = repository.findByShortCode(shortCode)
                 .orElseThrow(() -> new UrlNotFoundException("Short URL not found for code: " + shortCode));
@@ -59,7 +60,7 @@ public class UrlMappingServiceImpl implements UrlMappingService {
             throw new UrlExpiredException("Short URL with code '" + shortCode + "' has expired");
         }
 
-        // Increment click count only if URL is active
+        // Increment click count
         mapping.setClickCount(mapping.getClickCount() + 1);
         return repository.save(mapping);
     }
