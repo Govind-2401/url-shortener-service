@@ -51,7 +51,9 @@ public class UrlMappingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{shortCode}")
+    // Regex match: Sirf Base62 alphanumeric shortcodes match honge (e.g. /b, /aX9).
+    // Isse index.html, favicon.ico aur swagger files bypass hokar direct static resources se serve hongi.
+    @GetMapping("/{shortCode:[a-zA-Z0-9]+}")
     @Operation(summary = "Redirect Short URL", description = "Redirects to original URL. Returns 200 OK JSON for API clients/Swagger, or 302 Redirect for browsers.")
     public ResponseEntity<?> redirectToOriginalUrl(
             @PathVariable String shortCode,
@@ -59,21 +61,13 @@ public class UrlMappingController {
             @RequestHeader(value = "User-Agent", defaultValue = "") String userAgent,
             @RequestHeader(value = "accept", defaultValue = "") String acceptHeader) {
 
-        // Swagger UI, static resources, aur favicon ko shortCode lookup se bypass karein
-        if (shortCode.equals("swagger-ui.html") ||
-                shortCode.equals("favicon.ico") ||
-                shortCode.startsWith("swagger-ui") ||
-                shortCode.startsWith("v3")) {
-            return ResponseEntity.notFound().build();
-        }
-
         UrlMapping mapping = urlMappingService.getByShortCode(shortCode);
 
         // Client Type Inspection
         boolean isSwagger = referer.contains("swagger-ui") || userAgent.contains("Swagger");
         boolean isApiClient = acceptHeader.contains("application/json") || acceptHeader.contains("*/*");
 
-        // Agar Swagger/Postman/API Client hai toh JSON 200 return karo
+        // Agar Swagger/Postman/API Client request hai toh JSON response bhejain
         if (isSwagger || (isApiClient && !userAgent.contains("Mozilla"))) {
             return ResponseEntity.ok(Map.of(
                     "status", "Redirect Success",
