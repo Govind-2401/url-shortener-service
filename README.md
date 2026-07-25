@@ -70,6 +70,41 @@ By combining **Base62 Encoding** with **Caffeine In-Memory Caching (`@CachePut`)
 * **QR Generation:** QRCode.js
 
 ---
+## 📁 Project Structure
+
+```text
+url-shortener-service/
+├── .github/
+│   └── workflows/              # GitHub Actions CI/CD pipelines (optional)
+├── Screenshot/                 # Project screenshots for documentation
+│   ├── Screenshot 2026-07-23 003136.png
+│   ├── Screenshot_23-7-2026_0324_localhost.jpeg
+│   └── Screenshot_23-7-2026_03345_localhost.jpeg
+├── src/
+│   ├── main/
+│   │   ├── java/com/govind/urlshortener/
+│   │   │   ├── config/          # CORS, Swagger & Cache Configurations
+│   │   │   ├── controller/      # REST API Controllers & Web Mappings
+│   │   │   ├── dto/             # Data Transfer Objects (Request/Response)
+│   │   │   ├── entity/          # JPA Entities (UrlMapping)
+│   │   │   ├── exception/       # Global Exception Handler & Custom Exceptions
+│   │   │   ├── filter/          # Rate Limiting Filter (Bucket4j)
+│   │   │   ├── repository/      # Spring Data JPA Repositories
+│   │   │   ├── service/         # Service Layer & Caching Business Logic
+│   │   │   ├── util/            # Base62 Encoder Utility
+│   │   │   └── UrlShortenerApplication.java # Main Application Entry Point
+│   │   └── resources/
+│   │       ├── static/          # Frontend Dashboard (HTML, JS, CSS)
+│   │       │   └── index.html
+│   │       └── application.yaml # Database, Server & Logging Configuration
+│   └── test/                    # Unit & Integration Tests
+├── .gitignore                   # Git Ignore File
+├── LICENSE                      # MIT Open Source License
+├── pom.xml                      # Maven Dependencies & Build Setup
+└── README.md                    # Project Documentation
+
+```
+---
 
 ## 🏗️ Architecture & System Flow
 
